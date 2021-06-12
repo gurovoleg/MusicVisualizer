@@ -271,6 +271,14 @@ function createCanvasListeners (canvas) {
 // 	audioElement.pause()		
 // })
 
+audioElement.addEventListener('touchend', () => {
+	if (audioElement.paused) {
+		audioElement.play()		
+	} else {
+		audioElement.pause()		
+	}		
+})
+
 document.addEventListener('click', () => {
 	if (audioElement.paused) {
 		audioElement.play()		
