@@ -1,12 +1,9 @@
 const settings = {
 	renderTime: 0,
-	// bgColor: '#E65100',
-	// bgColor: '#212121',
 	bgColor: '#d50000',
+	gradientColors: BLOCK_COLORS,
 	particle: {
 		color: '#fff',
-		color: 'red',
-		// color: '#1E88E5',
 		total: 256,
 		radius: 3,
 		maxVelocity: 1,
@@ -15,9 +12,9 @@ const settings = {
 	},
 	mouseMoveAction: 'pull', // поведение при наведении мышки: join - соединяет, pull - отталкивает
 	// mouseMoveAction: 'join', // поведение при наведении мышки: join - соединяет, pull - отталкивает
-	mouseParticleRadius: 100,
-	mouseParticleColor: 'rgba(0,0,0,0.1)'
-	// mouseParticleColor: 'transparent'
+	mouseParticleRadius: 70,
+	mouseParticleColor: () => 'transparent'
+	// mouseParticleColor: () => this.mouseMoveAction === 'join' ? 'transparent' : 'rgba(0,0,0,0.1)'
 }
 
 let canvas
@@ -29,9 +26,8 @@ let mouseParticle // частица для мышки
 // Создать canvas
 function createCanvas (width, height) {
 	const container = document.querySelector('.container')
-
 	const canvas = document.createElement('canvas')	
-	canvas.style.display = 'block'
+
 	ctx = canvas.getContext('2d')
 	canvas.width = width || document.documentElement.clientWidth
 	canvas.height = height || document.documentElement.clientHeight
@@ -48,15 +44,26 @@ function clearCanvas () {
 	ctx.restore()
 }
 
+// градиент для фона canvas
+function setGradientColor (random = false) {
+	const colors = settings.gradientColors
+	const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);	
+	gradient.addColorStop(0.1, random ? getRandomFrom(colors) : colors[0]);
+	gradient.addColorStop(0.4, random ? getRandomFrom(colors) : colors[1]);
+	gradient.addColorStop(0.8, random ? getRandomFrom(colors) : colors[2]);
+	gradient.addColorStop(1, random ? getRandomFrom(colors) : colors[3]);
+	
+	return gradient
+}
+
 // Рисуем фон
 function drawBackground () {
-	// ctx.fillStyle = getRandomFrom(BLOCK_COLORS)
-	// ctx.fillStyle = `rgba(0, 0, ${getRandomFrom(dataArray)})`
-	// ctx.fillStyle = `rgba(0, 0, 0, 0)`
 	if (!dataArray || audioElement && audioElement.paused) {
-		// ctx.fillStyle = settings.bgColor	
+		ctx.fillStyle = setGradientColor()
 	} else {
 		// ctx.fillStyle = `rgba(${getRandomFrom(dataArray)}, ${getRandomFrom(dataArray)}, ${getRandomFrom(dataArray)})`	
+		const colors = settings.gradientColors.slice(0, -1)
+		ctx.fillStyle = getRandomFrom(colors)	
 	}
 	
 	ctx.fillRect(0, 0, canvas.width, canvas.height)
@@ -126,6 +133,11 @@ class Particle {
 function createParticles (quantity = settings.particle.total) {
 	for (let i = 0; i < quantity; i++) {
 		particles.push(new Particle)
+		// const radius =  Math.floor(Math.random() * (7 - 3 + 1)) + 3
+		// const radius = Math.random() > 0.1 ? 3 : 13
+		// color = Math.random() > 0.5 ? 'rgba(255,255,255,0.2)' : '#fff'
+		// color = radius === 13 ? 'rgba(255,255,255,0.2)' : '#fff'
+		// particles.push(new Particle(null, null, null, color))
 	}
 }
 
@@ -150,6 +162,7 @@ function drawLines () {
 		for (let j = i + 1; j < particles.length; j++) {
 			const p2 = particles[j]
 			const length = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2))
+			
 			if (length < settings.particle.lineLength) {
 				const opacity = 1 - length / settings.particle.lineLength
 				ctx.beginPath()
@@ -163,6 +176,7 @@ function drawLines () {
 					// ctx.strokeStyle = `rgba(${dataArray[i]}, ${dataArray[i]}, 255, ${opacity})`	
 				}
 				// ctx.strokeStyle = `rgba(30, 136, 229, ${opacity})`
+				
 				ctx.lineWidth = settings.particle.lineWidth
 				ctx.lineTo(p2.x, p2.y)
 				ctx.closePath()
@@ -199,7 +213,7 @@ function init () {
 	createCanvasListeners(canvas)
 
 	// Создаем точку-частицу для мышки
-	mouseParticle = new Particle(null, null, settings.mouseParticleRadius, settings.mouseParticleColor)
+	mouseParticle = new Particle(null, null, settings.mouseParticleRadius, settings.mouseParticleColor())
 
 	createParticles()
 	requestAnimationFrame(render)	
@@ -221,10 +235,10 @@ function createCanvasListeners (canvas) {
 
 	canvas.addEventListener('mouseover', (e) => {
 		mouseOver = true
-		// if (settings.mouseMoveAction === 'join') {
-		// 	particles.push(mouseParticle)	
-		// }
-		// mouseParticle.setPosition(e.pageX, e.pageY)
+		if (settings.mouseMoveAction === 'join') {
+			particles.push(mouseParticle)	
+		}
+		mouseParticle.setPosition(e.pageX, e.pageY)
 	})
 
 	canvas.addEventListener('mouseout', (e) => {

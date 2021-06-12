@@ -1,4 +1,6 @@
-const BLOCK_COLORS = ['#f44336', '#9C27B0', '#3F51B5', '#03A9F4', '#009688', '#8BC34A', '#FF9800', '#795548', '#607D8B' ]
+// const BLOCK_COLORS = ['#f44336', '#9C27B0', '#3F51B5', '#03A9F4', '#009688', '#8BC34A', '#FF9800', '#795548', '#607D8B' ]
+const BLOCK_COLORS = ['#152B51', '#2A58A2', '#8B0470', 'pink']
+
 
 // Получаем случайный элемент массива
 function getRandomFrom (array) {
@@ -59,15 +61,13 @@ if (audioElement) {
 		  let x = 0
 
 		  let color = getRandomFrom(BLOCK_COLORS)
+		  // let color = `rgb( ${(Math.floor(Math.random() * (256))).toString()}, ${(Math.floor(Math.random() * (256))).toString()}, ${(Math.floor(Math.random() * (256))).toString()} )`
 		  
 		  for(let i = 0; i < bufferLength; i++) {
-		  // for(let i = 0; i < bufferLength; i++) {
+		  // for(let i = 0; i < 150; i++) {
 		    barHeight = dataArray[i] / 2;
 		    // canvasCtx.fillStyle = `rgb(${barHeight + 100}, ${barHeight + 100}, ${barHeight + 100})`
 		    canvasCtx.fillStyle = color
-		    // canvasCtx.fillStyle = '#000'
-		    // canvasCtx.fillStyle = '#d50000';
-		    // canvasCtx.fillRect(x, HEIGHT - barHeight, barWidth, barHeight);
 		    canvasCtx.fillRect(x, HEIGHT - barHeight, barWidth, HEIGHT);
 		    
 		    x += barWidth
