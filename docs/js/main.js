@@ -279,14 +279,14 @@ audioElement.addEventListener('touchend', () => {
 	}		
 })
 
-document.addEventListener('click', () => {
-	if (audioElement.paused) {
-		audioElement.play()		
-	} else {
-		audioElement.pause()		
-	}
-	// console.dir(audioElement)
-	// console.log(audioElement.paused)
-})
+// document.addEventListener('click', () => {
+// 	if (audioElement.paused) {
+// 		audioElement.play()		
+// 	} else {
+// 		audioElement.pause()		
+// 	}
+// 	// console.dir(audioElement)
+// 	// console.log(audioElement.paused)
+// })
 
 init ()
