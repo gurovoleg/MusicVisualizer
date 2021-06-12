@@ -1,7 +1,7 @@
 const settings = {
 	renderTime: 2,
-	bgColor: '#d50000',
-	gradientColors: BLOCK_COLORS,
+	bgColor: '#d50000', // цвет фона
+	gradientColors: ['#152B51', '#2A58A2', '#8B0470', 'pink'],
 	particle: {
 		color: '#fff',
 		total: 256,
@@ -23,6 +23,15 @@ const particles = [] // частицы
 let mouseOver = false // индикатор нахождения мышки на поле
 let mouseParticle // частица для мышки
 let intervalTime = settings.renderTime
+const audioElement = document.querySelector("#audio")
+audioElement.loop = true
+let dataArray = null // массив для звуковых частот
+
+// Получаем случайный элемент массива
+function getRandomFrom (array) {
+	const random = Math.floor(Math.random() * array.length)
+	return array[random]
+}
 
 // Создать canvas
 function createCanvas (width, height) {
@@ -270,22 +279,30 @@ function createCanvasListeners (canvas) {
 // 	audioElement.pause()		
 // })
 
-audioElement.addEventListener('touchend', () => {
-	if (audioElement.paused) {
-		audioElement.play()		
-	} else {
-		audioElement.pause()		
-	}		
-})
-
-// document.addEventListener('click', () => {
+// audioElement.addEventListener('touchend', () => {
 // 	if (audioElement.paused) {
 // 		audioElement.play()		
 // 	} else {
 // 		audioElement.pause()		
-// 	}
-// 	// console.dir(audioElement)
-// 	// console.log(audioElement.paused)
+// 	}		
 // })
+
+audioElement.addEventListener('loadeddata', function() {
+		console.log('Loaded')    
+});
+
+document.addEventListener('dblclick', () => {
+	if (audioElement.paused) {
+		audioElement.play()		
+	} else {
+		audioElement.pause()		
+	}
+
+	// if (audioContext.state === 'suspended') {
+	// 	audioContext.resume()
+	// } else {
+	// 	audioContext.suspend()
+	// }
+})
 
 init ()

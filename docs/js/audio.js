@@ -1,21 +1,8 @@
-// const BLOCK_COLORS = ['#f44336', '#9C27B0', '#3F51B5', '#03A9F4', '#009688', '#8BC34A', '#FF9800', '#795548', '#607D8B' ]
-const BLOCK_COLORS = ['#152B51', '#2A58A2', '#8B0470', 'pink']
-
-
-// Получаем случайный элемент массива
-function getRandomFrom (array) {
-	const random = Math.floor(Math.random() * array.length)
-	return array[random]
-}
-
-const audioElement = document.querySelector("#audio")
 // создаем аудио контекст
 const audioContext = new AudioContext()
-let dataArray = null
-
 
 if (audioElement) {
-	audioElement.autoplay = false
+	// audioElement.autoplay = false
 
 	 // подключаем источник звука (HTML-элемент audio)
 	const source = audioContext.createMediaElementSource(audioElement)
@@ -52,7 +39,7 @@ if (audioElement) {
 	  if (timeStamp >= durationTime) {
 		  analyser.getByteFrequencyData(dataArray)
 			canvasCtx.clearRect(0, 0, WIDTH, HEIGHT)
-		  // canvasCtx.fillStyle = getRandomFrom(BLOCK_COLORS)
+		  // canvasCtx.fillStyle = getRandomFrom(settings.gradientColors)
 		  // canvasCtx.fillStyle = 'white';
 		  // canvasCtx.fillRect(0, 0, WIDTH, HEIGHT)
 
@@ -60,7 +47,7 @@ if (audioElement) {
 		  let barHeight
 		  let x = 0
 
-		  let color = getRandomFrom(BLOCK_COLORS)
+		  let color = getRandomFrom(settings.gradientColors)
 		  // let color = `rgb( ${(Math.floor(Math.random() * (256))).toString()}, ${(Math.floor(Math.random() * (256))).toString()}, ${(Math.floor(Math.random() * (256))).toString()} )`
 		  
 		  for(let i = 0; i < bufferLength; i++) {
