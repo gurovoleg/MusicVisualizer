@@ -64,7 +64,6 @@ if (audioElement) {
 		  // let color = `rgb( ${(Math.floor(Math.random() * (256))).toString()}, ${(Math.floor(Math.random() * (256))).toString()}, ${(Math.floor(Math.random() * (256))).toString()} )`
 		  
 		  for(let i = 0; i < bufferLength; i++) {
-		  // for(let i = 0; i < 150; i++) {
 		    barHeight = dataArray[i] / 2;
 		    // canvasCtx.fillStyle = `rgb(${barHeight + 100}, ${barHeight + 100}, ${barHeight + 100})`
 		    canvasCtx.fillStyle = color

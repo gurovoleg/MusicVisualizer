@@ -259,9 +259,26 @@ function createCanvasListeners (canvas) {
 	})
 }
 
-// document.addEventListener('click', () => {
-// 	console.log(audioContext.state)
-// 	console.dir(dataArray)
+// audioElement.addEventListener('play', () => {
+// 	console.log(audioElement.paused)
+// 	console.log('palyed')
+// 	audioElement.play()		
 // })
+
+// audioElement.addEventListener('pause', () => {
+// 	console.log(audioElement.paused)
+// 	console.log('pause')
+// 	audioElement.pause()		
+// })
+
+document.addEventListener('click', () => {
+	if (audioElement.paused) {
+		audioElement.play()		
+	} else {
+		audioElement.pause()		
+	}
+	// console.dir(audioElement)
+	// console.log(audioElement.paused)
+})
 
 init ()
