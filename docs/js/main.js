@@ -229,7 +229,6 @@ function init () {
 window.addEventListener('resize', () => {
 	canvas.width = document.documentElement.clientWidth
 	canvas.height = document.documentElement.clientHeight
-	render(Date.now())
 })
 
 function createCanvasListeners (canvas) {
