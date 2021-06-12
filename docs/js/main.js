@@ -1,5 +1,5 @@
 const settings = {
-	renderTime: 0,
+	renderTime: 2,
 	bgColor: '#d50000',
 	gradientColors: BLOCK_COLORS,
 	particle: {
@@ -22,6 +22,7 @@ let ctx
 const particles = [] // частицы
 let mouseOver = false // индикатор нахождения мышки на поле
 let mouseParticle // частица для мышки
+let intervalTime = settings.renderTime
 
 // Создать canvas
 function createCanvas (width, height) {
@@ -188,8 +189,6 @@ function drawLines () {
 
 // Обновляем экран
 function render (timeStamp) {
-	let intervalTime = settings.renderTime
-
 	if (timeStamp >= intervalTime) {
 		if (window.analyser) window.analyser.getByteFrequencyData(dataArray)
 		clearCanvas()
@@ -200,6 +199,7 @@ function render (timeStamp) {
 			mouseParticle.draw()
 		}
 		
+		// intervalTime = settings.renderTime + timeStamp	
 		intervalTime = settings.renderTime + timeStamp	
 	}
 
@@ -208,6 +208,12 @@ function render (timeStamp) {
 
 
 function init () {
+	// Задаем количество частиц для мобильных экранов
+	const screenWidth = document.documentElement.clientWidth
+	if (screenWidth < 460) {
+		settings.particle.total = 64
+	}
+	
 	canvas = createCanvas()
 	
 	createCanvasListeners(canvas)
