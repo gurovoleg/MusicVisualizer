@@ -5,6 +5,7 @@ const settings = {
 	bgColor: '#d50000',
 	particle: {
 		color: '#fff',
+		color: 'red',
 		// color: '#1E88E5',
 		total: 256,
 		radius: 3,
@@ -51,10 +52,11 @@ function clearCanvas () {
 function drawBackground () {
 	// ctx.fillStyle = getRandomFrom(BLOCK_COLORS)
 	// ctx.fillStyle = `rgba(0, 0, ${getRandomFrom(dataArray)})`
+	// ctx.fillStyle = `rgba(0, 0, 0, 0)`
 	if (!dataArray || audioElement && audioElement.paused) {
-		ctx.fillStyle = settings.bgColor	
+		// ctx.fillStyle = settings.bgColor	
 	} else {
-		ctx.fillStyle = `rgba(${getRandomFrom(dataArray)}, ${getRandomFrom(dataArray)}, ${getRandomFrom(dataArray)})`	
+		// ctx.fillStyle = `rgba(${getRandomFrom(dataArray)}, ${getRandomFrom(dataArray)}, ${getRandomFrom(dataArray)})`	
 	}
 	
 	ctx.fillRect(0, 0, canvas.width, canvas.height)
@@ -219,10 +221,10 @@ function createCanvasListeners (canvas) {
 
 	canvas.addEventListener('mouseover', (e) => {
 		mouseOver = true
-		if (settings.mouseMoveAction === 'join') {
-			particles.push(mouseParticle)	
-		}
-		mouseParticle.setPosition(e.pageX, e.pageY)
+		// if (settings.mouseMoveAction === 'join') {
+		// 	particles.push(mouseParticle)	
+		// }
+		// mouseParticle.setPosition(e.pageX, e.pageY)
 	})
 
 	canvas.addEventListener('mouseout', (e) => {
