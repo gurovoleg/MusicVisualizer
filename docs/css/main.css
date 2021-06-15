@@ -128,10 +128,11 @@ label {
 	display: none;
 }
 
-.audio-player__seeker {
+.audio-player__progress {
 	position: relative;
 	width: 100%;
 	margin-top: 5px;
+	margin-top: 10px;
 	padding-bottom: 7px;
 	/*padding-top: 7px;*/
 }
