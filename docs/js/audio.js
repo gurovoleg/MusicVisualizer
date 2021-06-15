@@ -65,7 +65,7 @@ if (audioElement) {
 
 
 	// Создать canvas
-	function createCanvas (width, height) {
+	function createMusicCanvas (width, height) {
 		const visualizer = document.querySelector('.visualizer')
 		const canvas = document.createElement('canvas')	
 		canvas.width = width || visualizer.clientWidth
@@ -74,8 +74,8 @@ if (audioElement) {
 		return canvas
 	}
 
-	canvasMusic = createCanvas()
-	canvasCtx = canvasMusic.getContext('2d')
+	const canvasMusic = createMusicCanvas()
+	const canvasCtx = canvasMusic.getContext('2d')
 
 	draw()
 }

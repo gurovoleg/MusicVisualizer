@@ -22,25 +22,24 @@ let ctx
 const particles = [] // частицы
 let mouseOver = false // индикатор нахождения мышки на поле
 let mouseParticle // частица для мышки
-let intervalTime = settings.renderTime
-const audioElement = document.querySelector("#audio")
-audioElement.loop = true
+let intervalTime = settings.renderTime // обновление фона
+const audioElement = document.querySelector("#audio") // проигрыватель (HTMLMediaElement)
 let dataArray = null // массив для звуковых частот
-
-// Получаем случайный элемент массива
-function getRandomFrom (array) {
-	const random = Math.floor(Math.random() * array.length)
-	return array[random]
-}
+const container = document.querySelector('.container') // основной контейнер
+const uploader = document.querySelector('#uploader') // подгрузка файла
+let fileTitle = '' // название трека
+let currentTime = '0:00'
+const currentTimeElement = document.querySelector('#currentTime') // текущий таймер времени проигрывания
+const trackSeeker = document.querySelector('#trackSeeker') // ползунок времени проигрывания
 
 // Создать canvas
 function createCanvas (width, height) {
-	const container = document.querySelector('.container')
+	const coords = container.getBoundingClientRect()
 	const canvas = document.createElement('canvas')	
 
 	ctx = canvas.getContext('2d')
-	canvas.width = width || document.documentElement.clientWidth
-	canvas.height = height || document.documentElement.clientHeight
+	canvas.width = width || coords.width
+	canvas.height = height || coords.height
 	
 	container.append(canvas)
 	return canvas
@@ -207,12 +206,27 @@ function render (timeStamp) {
 		if (mouseOver) {
 			mouseParticle.draw()
 		}
-		
-		// intervalTime = settings.renderTime + timeStamp	
+
+		// обновялем текущее время трека и полосу прогресса
+		if (audioElement && !audioElement.paused) {
+			updatePlayerView()
+		}
+			
 		intervalTime = settings.renderTime + timeStamp	
 	}
 
 	requestAnimationFrame(render)	
+}
+
+// Обновление элементов плеера
+function updatePlayerView () {
+	currentTimeElement.textContent = formatTrackTime(audioElement.currentTime)	
+	if (trackSeeker) {
+		let percentValue = audioElement.currentTime * 100 / audioElement.duration
+		percentValue = percentValue > 50 ? Math.floor(percentValue) : Math.ceil(percentValue)
+		document.querySelector('.track-line__progress').style.width = percentValue + '%'
+		trackSeeker.value = audioElement.currentTime
+	}
 }
 
 
@@ -224,7 +238,7 @@ function init () {
 	}
 	
 	canvas = createCanvas()
-	
+
 	createCanvasListeners(canvas)
 
 	// Создаем точку-частицу для мышки
@@ -232,12 +246,17 @@ function init () {
 
 	createParticles()
 	requestAnimationFrame(render)	
+	// перезагружаем аудио элемент (требуется в некоторых браузерах (Firefox!), не подхватывает 
+  // событие подгрузки  по умолчанию loadeddata)
+	audioElement.load() 
+	
 }
 
 // eventListeners
 window.addEventListener('resize', () => {
-	canvas.width = document.documentElement.clientWidth
-	canvas.height = document.documentElement.clientHeight
+	const { width, height } = container.getBoundingClientRect()
+	canvas.width = width
+	canvas.height = height
 })
 
 function createCanvasListeners (canvas) {
@@ -287,22 +306,97 @@ function createCanvasListeners (canvas) {
 // 	}		
 // })
 
-audioElement.addEventListener('loadeddata', function() {
-		console.log('Loaded')    
-});
-
 document.addEventListener('dblclick', () => {
 	if (audioElement.paused) {
 		audioElement.play()		
 	} else {
 		audioElement.pause()		
 	}
-
-	// if (audioContext.state === 'suspended') {
-	// 	audioContext.resume()
-	// } else {
-	// 	audioContext.suspend()
-	// }
 })
 
-init ()
+uploader.addEventListener('change', (e) => {
+	const file = e.target.files[0]
+	fileTitle = file.name || '' // задаем название трека
+	const reader = new FileReader()
+	reader.readAsDataURL(file) // конвертирует Blob в base64 и вызывает onload
+	reader.addEventListener('loadend', () => {
+		audioElement.src = reader.result
+		pause.classList.add('d-none')		
+		play.classList.remove('d-none')
+	})
+})
+
+// получаем данные по длине трека после загрузки, задаем общее время и название трека
+audioElement.addEventListener('loadeddata', function () {
+	const durationTime = document.querySelector('#durationTime')
+	if (durationTime) durationTime.textContent = formatTrackTime(audioElement.duration)
+	if (trackSeeker) {
+		trackSeeker.max = audioElement.duration
+		trackSeeker.value = audioElement.currentTime
+		updatePlayerView()
+	}
+
+	const title = document.querySelector('.audio-player__title')
+	if (title && !fileTitle) {
+		const start = this.src.lastIndexOf('/') === -1 ? 0 : this.src.lastIndexOf('/')
+		title.textContent = this.src.substring(start + 1)
+	} else {
+		title.textContent = fileTitle
+	}
+})
+
+trackSeeker.addEventListener('input', (e) => {
+	audioElement.currentTime = e.target.value
+})
+
+// player controls eventListeners
+const pause = document.querySelector('#pauseControl')
+const play = document.querySelector('#playControl')
+const stop = document.querySelector('#stopControl')
+const volumeOn = document.querySelector('#volumeOn')
+const volumeOff = document.querySelector('#volumeOff')
+
+// отображение значков звука при загрузке
+if (audioElement && audioElement.muted) {
+	volumeOn.classList.add('d-none')		
+	volumeOff.classList.remove('d-none')	
+}
+
+console.dir(audioElement)
+
+play.addEventListener('click', () => {
+	audioElement.play()
+	pause.classList.remove('d-none')		
+	play.classList.add('d-none')		
+})
+
+pause.addEventListener('click', () => {
+	audioElement.pause()
+	pause.classList.add('d-none')		
+	play.classList.remove('d-none')		
+})
+
+stop.addEventListener('click', () => {
+	audioElement.pause()
+	audioElement.currentTime = 0
+	pause.classList.add('d-none')		
+	play.classList.remove('d-none')		
+	updatePlayerView()
+})
+
+volumeOn.addEventListener('click', () => {
+	audioElement.muted = true
+	volumeOn.classList.add('d-none')		
+	volumeOff.classList.remove('d-none')		
+})
+
+volumeOff.addEventListener('click', () => {
+	audioElement.muted = false
+	volumeOn.classList.remove('d-none')		
+	volumeOff.classList.add('d-none')		
+})
+
+
+// запуск приложения
+document.addEventListener('DOMContentLoaded', init)
+
