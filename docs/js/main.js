@@ -8,13 +8,15 @@ const settings = {
 		radius: 3,
 		maxVelocity: 1,
 		lineLength: 150,
-		lineWidth: 0.3
+		lineWidth: 0.3,
+		collision: false, // учет столкновения частиц
+		collisionType: 'kick' // тип столкновения: kick - отталкивание, flow - обтекание
 	},
 	mouseMoveAction: 'pull', // поведение при наведении мышки: join - соединяет, pull - отталкивает
 	// mouseMoveAction: 'join', // поведение при наведении мышки: join - соединяет, pull - отталкивает
 	mouseParticleRadius: 70,
-	mouseParticleColor: () => 'transparent'
-	// mouseParticleColor: () => this.mouseMoveAction === 'join' ? 'transparent' : 'rgba(0,0,0,0.1)'
+	// mouseParticleColor: () => 'transparent'
+	mouseParticleColor: () => this.mouseMoveAction === 'join' ? 'transparent' : 'rgba(0,0,0,0.1)'
 }
 
 let canvas
@@ -93,18 +95,22 @@ class Particle {
 		this.maxVelocityY = Math.random() * settings.particle.maxVelocity * 2 - settings.particle.maxVelocity
 	}
 
-	moveToPosition (x = 0, y = 0) {
-		const newX = this.x + this.maxVelocityX + x
-		const newY = this.y + this.maxVelocityY + y
-		
-		// -- Расчет движения при столкновении (settings.mouseMoveAction = 'pull')--
-		function collissionHandler (obj1, obj2) {
-			const dx = obj1.x - obj2.x
-			const dy = obj1.y - obj2.y
+	// расчет движения при столкновении 2-х объектов (settings.mouseMoveAction = 'pull')
+	static collissionHandler (obj1, obj2, type = 'flow' ) {
+		const dx = obj1.x - obj2.x
+		const dy = obj1.y - obj2.y
 
-			const d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2)) // расстояние между центрами объектов
+		const d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2)) // расстояние между центрами объектов
 
-			if (mouseOver && d <= obj1.radius + obj2.radius) {
+		if (d <= obj1.radius + obj2.radius) {
+			// вариант с отскоком друг от друга	
+			if (type === 'kick') {
+				obj1.maxVelocityX *= -1
+				obj1.maxVelocityY *= -1
+				obj2.maxVelocityX *= -1
+				obj2.maxVelocityY *= -1	
+			} else {
+				// вариант с обтеканием друг друга
 				const nx = dx / d
 				const ny = dy / d
 				const s = obj1.radius + obj2.radius - d // глубина проникновения
@@ -112,12 +118,17 @@ class Particle {
 				obj1.x += nx * s / 2
 				obj1.y += ny * s / 2
 				obj2.x -= nx * s / 2
-				obj2.y -= ny * s / 2
+				obj2.y -= ny * s / 2	
 			}
 		}
+	}
 
-		if (settings.mouseMoveAction === 'pull') {
-			collissionHandler(this, mouseParticle)
+	moveToPosition (x = 0, y = 0) {
+		const newX = this.x + this.maxVelocityX + x
+		const newY = this.y + this.maxVelocityY + y
+		
+		if (mouseOver && settings.mouseMoveAction === 'pull') {
+			Particle.collissionHandler(this, mouseParticle)
 		}
 		
 		if (newX >= canvas.width || newX <= 0) {
@@ -142,11 +153,11 @@ class Particle {
 function createParticles (quantity = settings.particle.total) {
 	for (let i = 0; i < quantity; i++) {
 		particles.push(new Particle)
-		// const radius =  Math.floor(Math.random() * (7 - 3 + 1)) + 3
+		// const radius =  Math.floor(Math.random() * (12 - 3 + 1)) + 3
 		// const radius = Math.random() > 0.1 ? 3 : 13
 		// color = Math.random() > 0.5 ? 'rgba(255,255,255,0.2)' : '#fff'
 		// color = radius === 13 ? 'rgba(255,255,255,0.2)' : '#fff'
-		// particles.push(new Particle(null, null, null, color))
+		// particles.push(new Particle(null, null, radius, color))
 	}
 }
 
@@ -171,6 +182,11 @@ function drawLines () {
 		for (let j = i + 1; j < particles.length; j++) {
 			const p2 = particles[j]
 			const length = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2))
+
+			// учет столкновения частиц друг с другом
+			if (settings.particle.collision) {
+				Particle.collissionHandler(p1, p2, settings.particle.collisionType)	
+			}
 			
 			if (length < settings.particle.lineLength) {
 				const opacity = 1 - length / settings.particle.lineLength
