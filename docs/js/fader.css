@@ -1,0 +1,83 @@
+.fader {
+	width: 100%;
+	padding: 5px;
+	margin-bottom: 0px;
+	/*display: flex;
+	justify-content: center;
+	align-items: center;*/
+}
+
+.fader--mb {
+	margin-bottom: 10px;
+}
+
+.fader-title {
+	font-size:  10px;		
+	text-align: center;
+	margin-bottom: 8px;
+	color:  rgba(0, 0, 0, 0.5);
+}
+
+.fader-values {
+	width: 100%;
+	/*padding: 5px;*/
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 5px;	
+}
+
+.fader-value {
+	font-family: 'segoe ui';
+	font-size: 10px;
+	color:  rgba(0, 0, 0, 0.5);
+}
+
+.fader-indicator {
+	position: relative;
+	background: #FAF0F8;
+	height: 4px;
+	width: 100%;
+	border-radius: 5px;
+}
+
+.fader-indicator__progress {
+	position: absolute;
+	top: 0px;
+	background: #3066BE;
+	border-radius: 5px;
+	height: 4px;
+	width: 0%;
+}
+
+.fader-control {
+	top: -10px;
+	position: relative;
+	z-index: 2;
+	height: 8px;
+	width: 8px;
+	border-radius: 50%;
+	background-color: #000;
+	cursor: pointer;
+	display: inline-block;	
+}
+
+.fader-control__value {
+	display: none;
+	top: -30px;
+	left: 50%;
+	transform:  translateX(-50%);
+	position: absolute;
+	z-index: 100;
+	border-radius: 5px;
+	font-family: 'segoe ui';
+	font-size: 10px;
+	padding: 5px;
+	background: #3066BE;
+	color: #fff;
+	box-shadow: 0 2px 3px 0px rgba(0, 0, 0, 0.4);
+}
+
+.d-block {
+	display: block;
+}

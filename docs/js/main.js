@@ -16,15 +16,16 @@ const settings = {
 	// mouseMoveAction: 'join', // поведение при наведении мышки: join - соединяет, pull - отталкивает
 	mouseParticleRadius: 70,
 	// mouseParticleColor: () => 'transparent'
-	mouseParticleColor: () => this.mouseMoveAction === 'join' ? 'transparent' : 'rgba(0,0,0,0.1)'
+	mouseParticleColor: () => this.mouseMoveAction === 'join' ? 'transparent' : 'rgba(0, 0, 0, 0)'
 }
 
 let canvas
 let ctx
-const particles = [] // частицы
+let particles = [] // частицы
 let mouseOver = false // индикатор нахождения мышки на поле
 let mouseParticle // частица для мышки
 let intervalTime = settings.renderTime // обновление фона
+let requestAnimationId = null
 const audioElement = document.querySelector("#audio") // проигрыватель (HTMLMediaElement)
 let dataArray = null // массив для звуковых частот
 const container = document.querySelector('.container') // основной контейнер
@@ -33,6 +34,7 @@ let fileTitle = '' // название трека
 let currentTime = '0:00'
 const currentTimeElement = document.querySelector('#currentTime') // текущий таймер времени проигрывания
 const trackSeeker = document.querySelector('#trackSeeker') // ползунок времени проигрывания
+let audioPlayerFader // ползунок времени проигрывания
 
 // Создать canvas
 function createCanvas (width, height) {
@@ -212,7 +214,7 @@ function drawLines () {
 }
 
 // Обновляем экран
-function render (timeStamp) {
+function render (timeStamp = 0) {
 	if (timeStamp >= intervalTime) {
 		if (window.analyser) window.analyser.getByteFrequencyData(dataArray)
 		clearCanvas()
@@ -231,17 +233,20 @@ function render (timeStamp) {
 		intervalTime = settings.renderTime + timeStamp	
 	}
 
-	requestAnimationFrame(render)	
+	requestAnimationId = requestAnimationFrame(render)	
 }
 
 // Обновление элементов плеера
-function updatePlayerView () {
+function updatePlayerView (reset = false) {
+	if (reset) {
+  	pause.classList.add('d-none')		
+		play.classList.remove('d-none')		
+  }
+
 	currentTimeElement.textContent = formatTrackTime(audioElement.currentTime)	
-	if (trackSeeker) {
-		let percentValue = audioElement.currentTime * 100 / audioElement.duration
-		percentValue = percentValue > 50 ? Math.floor(percentValue) : Math.ceil(percentValue)
-		document.querySelector('.track-line__progress').style.width = percentValue + '%'
-		trackSeeker.value = audioElement.currentTime
+	if (audioPlayerFader) {
+		const offset = Math.abs(Math.floor(audioPlayerFader.indicatorCoords.width * audioElement.currentTime / audioPlayerFader.max))
+		audioPlayerFader.move(offset, false)
 	}
 }
 
@@ -256,16 +261,35 @@ function init () {
 	canvas = createCanvas()
 
 	createCanvasListeners(canvas)
+	
+	// создаем ползунок для проигрывателя
+	audioPlayerFader = new Fader({ 
+		id: '#audioPlayerProgress', 
+		withValues: false, 
+		showValue: false,
+		onManualChange: function (value) {
+			audioElement.currentTime = value 
+		}
+	})
+	
+	createPlayerListeners()
 
 	// Создаем точку-частицу для мышки
 	mouseParticle = new Particle(null, null, settings.mouseParticleRadius, settings.mouseParticleColor())
 
 	createParticles()
-	requestAnimationFrame(render)	
+	render()	
 	// перезагружаем аудио элемент (требуется в некоторых браузерах (Firefox!), не подхватывает 
   // событие подгрузки  по умолчанию loadeddata)
 	audioElement.load() 
-	
+}
+
+function destroy () {
+	cancelAnimationFrame(requestAnimationId)
+	canvas.remove()
+	particles = []
+	const playerProgressWrapper = document.querySelector('#audioPlayerProgress')
+	playerProgressWrapper.innerHTML = ''
 }
 
 // eventListeners
@@ -279,6 +303,14 @@ function createCanvasListeners (canvas) {
 	canvas.addEventListener('click', (e) => {
 		for (let i = 0; i < 5; i++) {
 			particles.push(new Particle(e.pageX, e.pageY))
+		}
+	})
+
+	canvas.addEventListener('dblclick', (e) => {
+		if (audioElement.paused) {
+			audioElement.play()		
+		} else {
+			audioElement.pause()		
 		}
 	})
 
@@ -302,14 +334,6 @@ function createCanvasListeners (canvas) {
 	})
 }
 
-document.addEventListener('dblclick', () => {
-	if (audioElement.paused) {
-		audioElement.play()		
-	} else {
-		audioElement.pause()		
-	}
-})
-
 uploader.addEventListener('change', (e) => {
 	const file = e.target.files[0]
 	fileTitle = file.name || '' // задаем название трека
@@ -326,10 +350,10 @@ uploader.addEventListener('change', (e) => {
 audioElement.addEventListener('loadeddata', function () {
 	const durationTime = document.querySelector('#durationTime')
 	if (durationTime) durationTime.textContent = formatTrackTime(audioElement.duration)
-	if (trackSeeker) {
-		trackSeeker.max = audioElement.duration
-		trackSeeker.value = audioElement.currentTime
-		updatePlayerView()
+	if (audioPlayerFader) {
+		audioPlayerFader.max = audioElement.duration
+		audioPlayerFader.move(audioElement.currentTime, false)
+		updatePlayerView(true)
 	}
 
 	const title = document.querySelector('.audio-player__title')
@@ -341,10 +365,6 @@ audioElement.addEventListener('loadeddata', function () {
 	}
 })
 
-trackSeeker.addEventListener('input', (e) => {
-	audioElement.currentTime = e.target.value
-})
-
 // player controls eventListeners
 const pause = document.querySelector('#pauseControl')
 const play = document.querySelector('#playControl')
@@ -352,47 +372,47 @@ const stop = document.querySelector('#stopControl')
 const volumeOn = document.querySelector('#volumeOn')
 const volumeOff = document.querySelector('#volumeOff')
 
-// отображение значков звука при загрузке
-if (audioElement && audioElement.muted) {
-	volumeOn.classList.add('d-none')		
-	volumeOff.classList.remove('d-none')	
+function createPlayerListeners () {
+	
+	// отображение значков звука при загрузке
+	if (audioElement && audioElement.muted) {
+		volumeOn.classList.add('d-none')		
+		volumeOff.classList.remove('d-none')	
+	}
+
+	play.addEventListener('click', () => {
+		audioElement.play()
+		pause.classList.remove('d-none')		
+		play.classList.add('d-none')		
+	})
+
+	pause.addEventListener('click', () => {
+		audioElement.pause()
+		pause.classList.add('d-none')		
+		play.classList.remove('d-none')		
+	})
+
+	stop.addEventListener('click', () => {
+		audioElement.pause()
+		audioElement.currentTime = 0
+		pause.classList.add('d-none')		
+		play.classList.remove('d-none')		
+		updatePlayerView()
+	})
+
+	volumeOn.addEventListener('click', () => {
+		audioElement.muted = true
+		volumeOn.classList.add('d-none')		
+		volumeOff.classList.remove('d-none')		
+	})
+
+	volumeOff.addEventListener('click', () => {
+		audioElement.muted = false
+		volumeOn.classList.remove('d-none')		
+		volumeOff.classList.add('d-none')		
+	})	
 }
-
-console.dir(audioElement)
-
-play.addEventListener('click', () => {
-	audioElement.play()
-	pause.classList.remove('d-none')		
-	play.classList.add('d-none')		
-})
-
-pause.addEventListener('click', () => {
-	audioElement.pause()
-	pause.classList.add('d-none')		
-	play.classList.remove('d-none')		
-})
-
-stop.addEventListener('click', () => {
-	audioElement.pause()
-	audioElement.currentTime = 0
-	pause.classList.add('d-none')		
-	play.classList.remove('d-none')		
-	updatePlayerView()
-})
-
-volumeOn.addEventListener('click', () => {
-	audioElement.muted = true
-	volumeOn.classList.add('d-none')		
-	volumeOff.classList.remove('d-none')		
-})
-
-volumeOff.addEventListener('click', () => {
-	audioElement.muted = false
-	volumeOn.classList.remove('d-none')		
-	volumeOff.classList.add('d-none')		
-})
 
 
 // запуск приложения
 document.addEventListener('DOMContentLoaded', init)
-
