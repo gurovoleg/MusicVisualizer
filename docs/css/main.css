@@ -55,30 +55,27 @@ body {
 .settings-panel {
 	position: absolute;
 	z-index: 100;
-	right: -200px;
+	right: 20px;
 	top: 50%;
 	transform: translateY(-50%);
-	width: 0px;
 	background: #fff;
 	border-radius: 50px;
-	padding: 0px;
-	transition: all .5s, right .3s;
 	opacity: 0;
+	width: 200px;
+	padding: 50px 20px;
+	transition: all .5s, right .3s;
+}
+
+@media (max-width: 576px) {
+	.settings-panel {
+	  right: 50%;
+		transform: translate(50%, -50%);
+	}
 }
 
 .settings-panel--active ~ .settings-panel {
 	opacity: 1;
-	width: 200px;
-	padding: 50px 20px;
-	right: 20px;
 	transition: all .1s, right .3s;
-}
-
-@media (max-width: 460px) {
-  .settings-panel--active ~ .settings-panel {
-    right: 50%;
-		transform: translate(50%, -50%);
-  }
 }
 
 .settings-panel__button {
