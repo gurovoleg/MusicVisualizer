@@ -75,7 +75,7 @@ body {
 
 .settings-panel--active ~ .settings-panel {
 	opacity: 1;
-	transition: all .1s, right .3s;
+	transition: all .5s, right .3s;
 }
 
 .settings-panel__button {
