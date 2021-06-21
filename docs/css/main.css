@@ -54,8 +54,9 @@ body {
 
 .settings-panel {
 	position: absolute;
-	z-index: 100;
+	z-index: -10;
 	right: 20px;
+	/*transform:  translateX(150%);*/
 	top: 50%;
 	transform: translateY(-50%);
 	background: #fff;
@@ -75,6 +76,8 @@ body {
 
 .settings-panel--active ~ .settings-panel {
 	opacity: 1;
+	z-index: 100;
+	/*transform: translate(0%, -50%);*/
 	transition: all .5s, right .3s;
 }
 
@@ -146,10 +149,10 @@ canvas {
 	overflow: hidden;
 }
 
-@media (max-width: 460px) {
+@media (max-width: 576px) {
   .visualizer {
     width: 300px;;
-    height: 60px;
+    /*height: 60px;*/
   }
 }
 
@@ -200,25 +203,11 @@ label {
 	width: 100%;
 	margin-top: 5px;
 	margin-top: 10px;
-	padding-bottom: 7px;
+	/*padding-bottom: 7px;*/
 	/*padding-top: 7px;*/
 }
 
-/*.track-line {
-	background: #FAF0F8;
-	height: 3px;
-	width: 100%;
-	border-radius: 5px;
-	margin-top: -5px;
-}
 
-.track-line__progress {
-	background: #3066BE;
-	border-radius: 5px;
-	height: 100%;
-	width: 0px;
-}
-*/
 /*input[type=range] {
   -webkit-appearance: none;
   width: 100%;

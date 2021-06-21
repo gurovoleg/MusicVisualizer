@@ -254,9 +254,11 @@ function updatePlayerView (reset = false) {
 function init () {
 	// Задаем количество частиц для мобильных экранов
 	const screenWidth = document.documentElement.clientWidth
-	if (screenWidth < 460) {
-		settings.particle.total = 64
+	if (screenWidth < 576) {
+		settings.particle.total = 128
 	}
+
+	settingsPanel.createControls()
 	
 	canvas = createCanvas()
 

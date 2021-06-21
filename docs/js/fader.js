@@ -17,10 +17,10 @@
 
 
 class Fader {
-	constructor ({ id, min, max, stopWithoutFocus = false, showValue = true,  withValues = true, title, onManualChange }) {
+	constructor ({ id, min, max, value, stopWithoutFocus = false, showValue = true,  withValues = true, title, onManualChange }) {
 		this.min = parseInt(min) || 0 // min
 		this.max = parseInt(max) || 100 // max
-		this.value = this.min // текущее значение
+		this.value = value || this.min // текущее значение
 		this.withValues = withValues // отображать показатели min max
 		this.title = title // добавить название
 		this.showValue = showValue // режим отображения значения ползунка (по умолчанию при нажатии)
@@ -31,8 +31,9 @@ class Fader {
 			console.error(`Ошибка! Не найден элемент с указанным идентификатором - ${id}`)	
 			return
 		}	
-		this.createHTML()
-		this.getCoords()
+		this.createHTML() // разметка
+		this.getCoords() // координаты
+		this.move(this.value * this.indicatorCoords.width / this.max) // сдвиг
 	}
 
   // создание разметки
@@ -143,7 +144,12 @@ class Fader {
 		this.indicatorCoords = this.faderIndicator.getBoundingClientRect() // координаты шкалы
 		this.controlCoords = this.faderControl.getBoundingClientRect() // координаты ползунка
 		this.shiftX = clientX ? clientX - this.controlCoords.left : 0; // смещение по Х при захвате
-		this.rightEdge = this.indicatorCoords.width - this.controlCoords.width // правый край шкалы с учетом ползунка
+		// шкала
+		this.leftEdge = 0 // левый край шкалы с учетом ползунка
+		this.rightEdge = this.indicatorCoords.width // правый край шкалы с учетом ползунка
+		// ползунок
+		this.minPosition = this.leftEdge - this.controlCoords.width / 2 // левое положение
+		this.maxPosition = this.rightEdge - this.controlCoords.width / 2 // правое положение
 	}
 
 	// обработчик движения мыши
@@ -155,11 +161,14 @@ class Fader {
 	// рассчет задается от началы шкалы, offset - смещение от начала шкалы, userInput - смещение задается пользователем
 	move = (offset, userInput = true) => {
 		if (offset >= this.rightEdge) {
-			this.render(this.rightEdge, true, userInput)
-		} else if (offset <= 0) {
-			this.render(0, false, userInput)
+			this.value = userInput ? this.max : this.value
+			this.render(this.rightEdge, this.maxPosition, userInput)
+		} else if (offset <= this.leftEdge) {
+			this.value = userInput ? this.min : this.value
+			this.render(this.leftEdge, this.minPosition, userInput)
 		} else {
-			this.render(offset, false, userInput)
+			this.value = userInput ? Math.floor(offset * this.max / this.indicatorCoords.width) : this.value
+			this.render(offset, offset - this.controlCoords.width / 2, userInput)
 		}
 	}
 
@@ -167,22 +176,20 @@ class Fader {
 	indicatorClickHandler = (e) => {
 		if (e.target !== this.faderControl) {
 			this.getCoords(e.clientX)
-			let newLeft = e.clientX - this.indicatorCoords.left
-			this.render(newLeft, newLeft >= this.rightEdge, true)
+			const newScaleOffset = parseInt(e.clientX - this.indicatorCoords.left)
+			this.move(newScaleOffset, true)
 		}
 	}
 
-	// обновлеям отображение элементов (offset - смещение по х, full - индиткатор заполненности, userInput - изменение от пользователя)
-	render = (offset, full = false, userInput) => {
-		this.faderControl.style.left = full ? this.rightEdge + 'px' : offset + 'px' // смещение ползунка
-		if (offset !== 0 && !full) offset += this.controlCoords.width / 2 // для не крайних положений сдвигаем прогресс под ползунок
-		this.faderIndicatorProgress.style.width = full ? '100%' : `${offset}px` // заливка прогресса
+	// обновлеям отображение элементов (scaleOffset - смещение по шкале, controlOffest - смещение ползунка, userInput - изменение от пользователя)
+	render = (scaleOffset, controlOffest, userInput) => {
+		this.faderControl.style.left = controlOffest + 'px' // смещение ползунка
+		this.faderIndicatorProgress.style.width = scaleOffset + 'px' // заливка прогресса
 		
-		this.value = offset === 0 ? this.min : full ? this.max : Math.abs(Math.floor(offset * this.max / this.indicatorCoords.width))
 		this.faderControl.title = this.value
 		this.faderControlValue.textContent = this.value
 
-		// запуск callback при изменение значения пользователем вручную
+		// запуск callback при изменение значения пользователем вручную для обновления данных снаружи
 		if (this.onManualChange && userInput) this.onManualChange(this.value)
 	}
 
