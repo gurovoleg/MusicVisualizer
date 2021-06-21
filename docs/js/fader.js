@@ -4,6 +4,7 @@
 
 		new Fader({ 
 			id: '#elementId', // тег-обертка, куда будет добавлен контрол
+			value, // текущее значение
 			min: 0, // начальное значение
 			max: 100, // конечное значение
 			title: 'Fader title', // заголовок (можно совсем не указывать или использовать свой вместе с оберткой)
@@ -145,8 +146,8 @@ class Fader {
 		this.controlCoords = this.faderControl.getBoundingClientRect() // координаты ползунка
 		this.shiftX = clientX ? clientX - this.controlCoords.left : 0; // смещение по Х при захвате
 		// шкала
-		this.leftEdge = 0 // левый край шкалы с учетом ползунка
-		this.rightEdge = this.indicatorCoords.width // правый край шкалы с учетом ползунка
+		this.leftEdge = 0 // левый край шкалы
+		this.rightEdge = this.indicatorCoords.width // правый край шкалы
 		// ползунок
 		this.minPosition = this.leftEdge - this.controlCoords.width / 2 // левое положение
 		this.maxPosition = this.rightEdge - this.controlCoords.width / 2 // правое положение

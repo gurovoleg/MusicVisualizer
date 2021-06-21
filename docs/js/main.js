@@ -1,4 +1,5 @@
-const settings = {
+const defaultSettings = {
+	storageKey: 'audioPlayerSettings',
 	renderTime: 2,
 	bgColor: '#d50000', // цвет фона
 	gradientColors: ['#152B51', '#2A58A2', '#8B0470', 'pink'],
@@ -15,9 +16,15 @@ const settings = {
 	mouseMoveAction: 'pull', // поведение при наведении мышки: join - соединяет, pull - отталкивает
 	// mouseMoveAction: 'join', // поведение при наведении мышки: join - соединяет, pull - отталкивает
 	mouseParticleRadius: 70,
-	// mouseParticleColor: () => 'transparent'
-	mouseParticleColor: () => this.mouseMoveAction === 'join' ? 'transparent' : 'rgba(0, 0, 0, 0)'
+	// mouseParticleColor: 'transparent'
+	mouseParticleColor: 'rgba(0, 0, 0, 0)'
 }
+
+function setMouseParticleColor (mouseMoveAction) {
+	return mouseMoveAction === 'join' ? 'transparent' : 'rgba(0, 0, 0, 0)'	
+}
+
+const settings = JSON.parse(localStorage.getItem(defaultSettings.storageKey)) || defaultSettings
 
 let canvas
 let ctx
@@ -277,7 +284,7 @@ function init () {
 	createPlayerListeners()
 
 	// Создаем точку-частицу для мышки
-	mouseParticle = new Particle(null, null, settings.mouseParticleRadius, settings.mouseParticleColor())
+	mouseParticle = new Particle(null, null, settings.mouseParticleRadius, setMouseParticleColor(settings.mouseMoveAction))
 
 	createParticles()
 	render()	

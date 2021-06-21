@@ -25,6 +25,7 @@ const settingsPanel = (function () {
 				settings.particle.radius = faderRadius.value
 				settings.particle.lineLength = faderLength.value
 				settings.particle.maxVelocity = faderVelocity.value
+				localStorage.setItem(settings.storageKey, JSON.stringify(settings))
 				destroy()
 				init()
 			})
