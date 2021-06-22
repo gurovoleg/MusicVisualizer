@@ -63,7 +63,7 @@ body {
 	border-radius: 50px;
 	opacity: 0;
 	width: 200px;
-	padding: 50px 20px;
+	padding: 40px 20px;
 	transition: all .5s, right .3s;
 }
 
@@ -90,6 +90,18 @@ body {
 	cursor: pointer;
 	font-size: 14px;
 	text-align: center;
+}
+
+.settings-panel__reset {
+	font-size: 14px;
+	text-align: center;	
+	margin-top: 10px;
+	cursor: pointer;
+	transition: color 0.3s;
+}
+
+.settings-panel__reset:hover {
+	color: #3066BE;
 }
 
 canvas {

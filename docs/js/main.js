@@ -11,7 +11,7 @@ const defaultSettings = {
 		lineLength: 150,
 		lineWidth: 0.3,
 		collision: false, // учет столкновения частиц
-		collisionType: 'kick' // тип столкновения: kick - отталкивание, flow - обтекание
+		collisionType: 'flow' // тип столкновения: kick - отталкивание, flow - обтекание
 	},
 	mouseMoveAction: 'pull', // поведение при наведении мышки: join - соединяет, pull - отталкивает
 	// mouseMoveAction: 'join', // поведение при наведении мышки: join - соединяет, pull - отталкивает
@@ -24,14 +24,13 @@ function setMouseParticleColor (mouseMoveAction) {
 	return mouseMoveAction === 'join' ? 'transparent' : 'rgba(0, 0, 0, 0)'	
 }
 
-const settings = JSON.parse(localStorage.getItem(defaultSettings.storageKey)) || defaultSettings
-
+let settings
 let canvas
 let ctx
 let particles = [] // частицы
 let mouseOver = false // индикатор нахождения мышки на поле
 let mouseParticle // частица для мышки
-let intervalTime = settings.renderTime // обновление фона
+let intervalTime = defaultSettings.renderTime // обновление фона
 let requestAnimationId = null
 const audioElement = document.querySelector("#audio") // проигрыватель (HTMLMediaElement)
 let dataArray = null // массив для звуковых частот
@@ -184,9 +183,7 @@ function drawParticles () {
 // Рисуем линии между частицами
 function drawLines () {
 	for (let i = 0; i < particles.length; i++) {
-		// settings.particle.lineLength = dataArray[i]
-		// settings.particle.lineWidth = dataArray[i] / 50
-		
+	
 		const p1 = particles[i]
 		for (let j = i + 1; j < particles.length; j++) {
 			const p2 = particles[j]
@@ -259,6 +256,7 @@ function updatePlayerView (reset = false) {
 
 
 function init () {
+	settings = JSON.parse(localStorage.getItem(defaultSettings.storageKey)) || JSON.parse(JSON.stringify(defaultSettings))
 	// Задаем количество частиц для мобильных экранов
 	const screenWidth = document.documentElement.clientWidth
 	if (screenWidth < 576) {
@@ -281,8 +279,6 @@ function init () {
 		}
 	})
 	
-	createPlayerListeners()
-
 	// Создаем точку-частицу для мышки
 	mouseParticle = new Particle(null, null, settings.mouseParticleRadius, setMouseParticleColor(settings.mouseMoveAction))
 
@@ -299,13 +295,13 @@ function destroy () {
 	particles = []
 	const playerProgressWrapper = document.querySelector('#audioPlayerProgress')
 	playerProgressWrapper.innerHTML = ''
+	settingsPanel.destroyControls()
 }
 
 // eventListeners
 window.addEventListener('resize', () => {
-	const { width, height } = container.getBoundingClientRect()
-	canvas.width = width
-	canvas.height = height
+	destroy()
+	init()
 })
 
 function createCanvasListeners (canvas) {
@@ -422,6 +418,8 @@ function createPlayerListeners () {
 	})	
 }
 
-
 // запуск приложения
-document.addEventListener('DOMContentLoaded', init)
+document.addEventListener('DOMContentLoaded', () => {
+	createPlayerListeners()
+	init()
+})

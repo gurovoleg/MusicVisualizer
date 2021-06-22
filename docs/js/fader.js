@@ -19,8 +19,8 @@
 
 class Fader {
 	constructor ({ id, min, max, value, stopWithoutFocus = false, showValue = true,  withValues = true, title, onManualChange }) {
-		this.min = parseInt(min) || 0 // min
-		this.max = parseInt(max) || 100 // max
+		this.min = parseFloat(min) || 0 // min
+		this.max = parseFloat(max) || 100 // max
 		this.value = value || this.min // текущее значение
 		this.withValues = withValues // отображать показатели min max
 		this.title = title // добавить название
