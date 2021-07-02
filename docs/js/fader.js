@@ -162,10 +162,12 @@ class Fader {
 	// рассчет задается от началы шкалы, offset - смещение от начала шкалы, userInput - смещение задается пользователем
 	move = (offset, userInput = true) => {
 		if (offset >= this.rightEdge) {
-			this.value = userInput ? this.max : this.value
+			// this.value = userInput ? this.max : this.value
+			this.value = this.max
 			this.render(this.rightEdge, this.maxPosition, userInput)
 		} else if (offset <= this.leftEdge) {
-			this.value = userInput ? this.min : this.value
+			// this.value = userInput ? this.min : this.value
+			this.value = this.min
 			this.render(this.leftEdge, this.minPosition, userInput)
 		} else {
 			this.value = userInput ? Math.floor(offset * this.max / this.indicatorCoords.width) : this.value

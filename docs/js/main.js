@@ -244,10 +244,10 @@ function render (timeStamp = 0) {
 function updatePlayerView (reset = false) {
 	if (reset) {
   	pause.classList.add('d-none')		
-		play.classList.remove('d-none')		
+		play.classList.remove('d-none')	 	
   }
 
-	currentTimeElement.textContent = formatTrackTime(audioElement.currentTime)	
+	currentTimeElement.textContent = formatTrackTime(audioElement.currentTime)	 
 	if (audioPlayerFader) {
 		const offset = Math.abs(Math.floor(audioPlayerFader.indicatorCoords.width * audioElement.currentTime / audioPlayerFader.max))
 		audioPlayerFader.move(offset, false)
